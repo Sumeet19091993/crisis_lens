@@ -12,7 +12,7 @@ router = APIRouter(tags=["live"])
 @router.websocket("/ws/live")
 async def live_socket(websocket: WebSocket):
     await websocket.accept()
-    redis_client = Redis.from_url(settings.redis_url, decode_responses=True, ssl_cert_reqs=None)
+    redis_client = Redis.from_url(settings.redis_url, decode_responses=True)
     pubsub = redis_client.pubsub()
     pubsub.subscribe("reports:new")
 
