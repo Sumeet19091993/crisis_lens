@@ -30,7 +30,12 @@ class Settings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        return self.REDIS_URL
+        url = self.REDIS_URL
+        if url.startswith("rediss://"):
+            return url
+        if url.startswith("redis://"):
+            return url
+        return url
 
 
 settings = Settings()
