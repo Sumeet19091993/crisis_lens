@@ -17,7 +17,10 @@ router = APIRouter(tags=["reports"])
 
 
 def get_redis() -> Redis:
-    return Redis.from_url(settings.redis_url, decode_responses=True)
+    url = settings.redis_url
+    if url.startswith("rediss://"):
+        return Redis.from_url(url, decode_responses=True, ssl_cert_reqs=False)
+    return Redis.from_url(url, decode_responses=True)
 
 
 def _serialize_report(db: Session, report) -> ReportOut:
