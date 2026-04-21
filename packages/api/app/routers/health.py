@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from redis import Redis
 from sqlalchemy import text
+import redis as redis_lib
 
 from ..config import settings
 from ..db import engine
@@ -22,11 +22,11 @@ def ready():
         raise HTTPException(status_code=503, detail=f"db not ready: {e}")
 
     try:
-        r = Redis.from_url(
-            settings.redis_url,
-            decode_responses=True,
-            socket_connect_timeout=5
-        )
+        url = settings.redis_url
+        if url.startswith("rediss://"):
+            r = redis_lib.from_url(url, decode_responses=True, ssl_cert_reqs=False)
+        else:
+            r = redis_lib.from_url(url, decode_responses=True)
         r.ping()
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"redis not ready: {e}")
