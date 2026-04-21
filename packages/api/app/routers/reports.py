@@ -16,11 +16,17 @@ from ..security import require_roles
 router = APIRouter(tags=["reports"])
 
 
-def get_redis() -> Redis:
-    url = settings.redis_url
-    if url.startswith("rediss://"):
-        return Redis.from_url(url, decode_responses=True, ssl_cert_reqs=False)
-    return Redis.from_url(url, decode_responses=True)
+def get_redis():
+    try:
+        url = settings.redis_url
+        if url.startswith("rediss://"):
+            r = Redis.from_url(url, decode_responses=True, ssl_cert_reqs=False)
+        else:
+            r = Redis.from_url(url, decode_responses=True)
+        r.ping()
+        return r
+    except Exception:
+        return None
 
 
 def _serialize_report(db: Session, report) -> ReportOut:
@@ -61,17 +67,21 @@ def create_report_handler(payload: ReportCreate, db: Session = Depends(get_db)):
 
     item = create_report(db, payload)
 
-    redis_client = get_redis()
-    redis_client.publish("reports:new", str(item.id))
-    redis_client.xadd(
-        settings.REDIS_STREAM_REPORTS,
-        {
-            "event": "report_created",
-            "report_id": str(item.id),
-            "channel": item.channel,
-            "severity": item.severity,
-        },
-    )
+    try:
+        redis_client = get_redis()
+        if redis_client:
+            redis_client.publish("reports:new", str(item.id))
+            redis_client.xadd(
+                settings.REDIS_STREAM_REPORTS,
+                {
+                    "event": "report_created",
+                    "report_id": str(item.id),
+                    "channel": item.channel,
+                    "severity": item.severity,
+                },
+            )
+    except Exception:
+        pass
 
     return _serialize_report(db, item)
 
