@@ -25,7 +25,7 @@ def ready():
         r = Redis.from_url(
             settings.redis_url,
             decode_responses=True,
-            ssl_cert_reqs=None
+            socket_connect_timeout=5
         )
         r.ping()
     except Exception as e:
