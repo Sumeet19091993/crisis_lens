@@ -4,7 +4,7 @@ from redis import Redis
 
 from .config import settings
 
-redis_client = Redis.from_url(settings.redis_url, decode_responses=True)
+redis_client = return Redis.from_url(settings.redis_url, decode_responses=True)
 
 
 def _client_key(request: Request) -> str:
