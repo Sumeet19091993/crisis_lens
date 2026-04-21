@@ -22,7 +22,11 @@ def ready():
         raise HTTPException(status_code=503, detail=f"db not ready: {e}")
 
     try:
-        r = Redis.from_url(settings.redis_url, decode_responses=True)
+        r = Redis.from_url(
+            settings.redis_url,
+            decode_responses=True,
+            ssl_cert_reqs=None
+        )
         r.ping()
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"redis not ready: {e}")
