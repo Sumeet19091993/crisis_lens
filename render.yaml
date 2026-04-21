@@ -1,0 +1,53 @@
+services:
+  - type: web
+    name: crisislens-api
+    runtime: docker
+    dockerfilePath: packages/api/Dockerfile
+    dockerContext: packages/api
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: crisislens-db
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: crisislens-db
+          property: port
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: crisislens-db
+          property: database
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: crisislens-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: crisislens-db
+          property: password
+      - key: REDIS_HOST
+        fromService:
+          name: crisislens-redis
+          type: redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          name: crisislens-redis
+          type: redis
+          property: port
+      - key: JWT_SECRET
+        generateValue: true
+
+databases:
+  - name: crisislens-db
+    plan: free
+    databaseName: crisislens
+    user: crisislens
+
+  - name: crisislens-redis
+    plan: free
+    # Note: Redis on Render free tier is listed under "Redis" service type.
+    # Add it manually in the Render dashboard if Blueprint doesn't auto-create it.
