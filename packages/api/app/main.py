@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from .logging_setup import configure_logging
@@ -12,6 +13,14 @@ from .routers.reports import router as reports_router
 configure_logging()
 
 app = FastAPI(title="CrisisLens API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.middleware("http")(request_log_middleware)
 
