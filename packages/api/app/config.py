@@ -8,14 +8,8 @@ class Settings(BaseSettings):
     APP_ENV: str = "dev"
     APP_PORT: int = 8000
 
-    POSTGRES_HOST: str = "localhost"
-    POSTGRES_PORT: int = 5432
-    POSTGRES_DB: str = "crisislens"
-    POSTGRES_USER: str = "crisislens"
-    POSTGRES_PASSWORD: str = "crisislens"
-
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
+    DATABASE_URL: str = "postgresql+psycopg://crisislens:crisislens@localhost:5432/crisislens"
+    REDIS_URL: str = "redis://localhost:6379/0"
 
     REDIS_STREAM_REPORTS: str = "reports:new"
     REDIS_STREAM_GROUP: str = "dispatchers"
@@ -32,14 +26,14 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        return (
-            f"postgresql+psycopg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
-            f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
-        )
+        url = self.DATABASE_URL
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+psycopg://", 1)
+        return url
 
     @property
     def redis_url(self) -> str:
-        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+        return self.REDIS_URL
 
 
 settings = Settings()
